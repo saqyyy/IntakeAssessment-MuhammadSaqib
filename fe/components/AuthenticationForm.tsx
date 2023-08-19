@@ -1,34 +1,24 @@
-import { upperFirst, useToggle } from '@mantine/hooks';
-import { useForm } from '@mantine/form';
 import {
-  TextInput,
-  PasswordInput,
-  Text,
-  Paper,
-  Group,
-  PaperProps,
-  Button,
-  Divider,
-  Checkbox,
-  Anchor,
-  Stack,
-  Loader,
+  Anchor, Button, Checkbox, Divider, Group, Loader, Paper, PaperProps, PasswordInput, Stack, Text, TextInput
 } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { upperFirst, useToggle } from '@mantine/hooks';
 
-import { authForm } from '../styles';
-import { useContextApi } from '../context/Context';
+import { notifications } from '@mantine/notifications';
 import { apiEndpoints } from '../config/apiConfig';
-import { SignupPayload } from '../interfaces';
-import { useState } from 'react';
+import { useContextApi } from '../context/Context';
 import useApi from '../hooks/useApi';
+import { SignupPayload } from '../interfaces';
+import { authForm } from '../styles';
+import { Notifications } from '@mantine/notifications';
 
 
 export function AuthenticationForm(props: PaperProps) {
   const { setUser } = useContextApi();
-  const {sendRequest, loading} = useApi();
+  const { sendRequest, loading } = useApi();
   const { classes } = authForm();
   const [type, toggle] = useToggle(['login', 'register']);
-  
+
   const form = useForm({
     initialValues: {
       email: '',
@@ -51,7 +41,7 @@ export function AuthenticationForm(props: PaperProps) {
         throw new Error('invalid email or password')
       }
       const { data } = resData;
-       
+
       setUser(prevState => {
         return {
           ...prevState,
@@ -66,19 +56,21 @@ export function AuthenticationForm(props: PaperProps) {
   };
 
   const handleSignup = async () => {
-    try {
-      const { name, email, password, role } = form.values;
-      const payload: SignupPayload = { name, email, password, role: role ? 'admin' : 'user'};
+    const { name, email, password, role } = form.values;
+    const payload: SignupPayload = { name, email, password, role: role ? 'admin' : 'user' };
 
-      const resData = await sendRequest(apiEndpoints.signup, payload, 'POST');
-      
-      if (resData?.statusCode) { 
-        throw new Error(resData?.message || 'something went wrong');
-      }
-    } catch (e) {
-      console.log(e.message);
-    } finally{
+    const resData = await sendRequest(apiEndpoints.signup, payload, 'POST');
+
+    if (resData?.statusCode) {
+      throw new Error(resData?.message || 'Something went wrong');
     }
+    notifications.show({
+      title: 'Success.',
+      message: 'Account created successfully.',
+      autoClose: 5000,
+      color: 'green',
+    });
+    toggle('login');
   };
 
   const handleClearForm = () => {
@@ -89,13 +81,14 @@ export function AuthenticationForm(props: PaperProps) {
 
   return (
     <Paper className={classes.formWrapper} shadow='lg' radius="md" p="xl" {...props}>
+      <Notifications position='top-right' />
       <Text size="lg" weight={500} ta="center">
         {type === 'login' ? 'Login' : 'Register'}
       </Text>
 
-      <Divider label={`Enter your ${type === 'login' ? 'Login' : 'Register' } details`} labelPosition="center" my="lg" />
+      <Divider label={`Enter your ${type === 'login' ? 'Login' : 'Register'} details`} labelPosition="center" my="lg" />
 
-      <form onSubmit={form.onSubmit(type==='login' ? handleLogin : handleSignup)}>
+      <form onSubmit={form.onSubmit(type === 'login' ? handleLogin : handleSignup)}>
         <Stack>
           {type === 'register' && (
             <TextInput
@@ -152,7 +145,7 @@ export function AuthenticationForm(props: PaperProps) {
               : "Don't have an account? Register"}
           </Anchor>
           <Button type="submit" radius="xl" className={classes.button}>
-            {loading ? 
+            {loading ?
               <Loader color='#fff' size="sm" />
               : upperFirst(type)
             }

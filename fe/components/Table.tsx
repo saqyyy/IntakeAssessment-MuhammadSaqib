@@ -35,7 +35,7 @@ function TableComponent({ expenses, handleStatusChange }: TableComponentProps) {
                         <IconCheck />
                       </Button>
                     </Group>
-                    )
+                  )
                   :
                   <Text c="#F29339">{element.status}</Text>
               }
@@ -44,6 +44,9 @@ function TableComponent({ expenses, handleStatusChange }: TableComponentProps) {
       </td>
     </tr>
   ));
+
+  console.log();
+
 
   return (
     <Table verticalSpacing="xs" className={classes.tableWrapper} withBorder>
@@ -55,7 +58,11 @@ function TableComponent({ expenses, handleStatusChange }: TableComponentProps) {
           <th>Status</th>
         </tr>
       </thead>
-      <tbody>{rows}</tbody>
+      <tbody>{
+        rows.length
+          ? rows
+          : <tr><td colSpan={4} align='center'>No records available.</td></tr>
+      }</tbody>
     </Table>
   );
 }
